@@ -52,6 +52,10 @@ export default function Navbar() {
           </li>
         ))}
       </ul>
+      <div className="border-t border-gray-700 pt-4 mt-4">
+        <p className="text-gold-light text-sm font-semibold italic">"Çok Para Lazım"</p>
+        <p className="text-gray-500 text-xs mt-0.5">— AEO</p>
+      </div>
     </nav>
   )
 }
