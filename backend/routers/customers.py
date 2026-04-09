@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from datetime import date, timedelta
 from database import get_connection
 from models import CustomerCreate, CustomerUpdate
+import google_calendar as gcal
 
 router = APIRouter(prefix="/api/customers", tags=["customers"])
 
@@ -15,15 +16,15 @@ def _create_birthday_reminders(conn, customer_id: int, name: str, birth_date: st
             continue
         remind_date = bd - timedelta(days=10)
         if remind_date >= today:
-            conn.execute(
+            msg = f"{name} doğum günü 10 gün sonra! Hediye önerisi için ara."
+            date_str = remind_date.strftime("%Y-%m-%d")
+            cur = conn.execute(
                 "INSERT INTO reminders (customer_id, reminder_type, scheduled_date, message) VALUES (?,?,?,?)",
-                (
-                    customer_id,
-                    "birthday",
-                    remind_date.strftime("%Y-%m-%d"),
-                    f"{name} doğum günü 10 gün sonra! Hediye önerisi için ara.",
-                ),
+                (customer_id, "birthday", date_str, msg),
             )
+            event_id = gcal.create_event("birthday", f"{name} — Doğum Günü", msg, date_str, cur.lastrowid)
+            if event_id:
+                conn.execute("UPDATE reminders SET google_event_id=? WHERE id=?", (event_id, cur.lastrowid))
 
 
 def _create_anniversary_reminders(conn, customer_id: int, name: str, anniversary_date: str):
@@ -35,15 +36,15 @@ def _create_anniversary_reminders(conn, customer_id: int, name: str, anniversary
             continue
         remind_date = ad - timedelta(days=10)
         if remind_date >= today:
-            conn.execute(
+            msg = f"{name} evlilik yıldönümü 10 gün sonra! Hediye önerisi için ara."
+            date_str = remind_date.strftime("%Y-%m-%d")
+            cur = conn.execute(
                 "INSERT INTO reminders (customer_id, reminder_type, scheduled_date, message) VALUES (?,?,?,?)",
-                (
-                    customer_id,
-                    "anniversary",
-                    remind_date.strftime("%Y-%m-%d"),
-                    f"{name} evlilik yıldönümü 10 gün sonra! Hediye önerisi için ara.",
-                ),
+                (customer_id, "anniversary", date_str, msg),
             )
+            event_id = gcal.create_event("anniversary", f"{name} — Yıldönümü", msg, date_str, cur.lastrowid)
+            if event_id:
+                conn.execute("UPDATE reminders SET google_event_id=? WHERE id=?", (event_id, cur.lastrowid))
 
 
 @router.get("/")

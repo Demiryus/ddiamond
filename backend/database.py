@@ -66,11 +66,17 @@ def init_db():
             scheduled_date TEXT,
             message TEXT,
             is_done INTEGER DEFAULT 0,
+            google_event_id TEXT,
             created_at TEXT DEFAULT (date('now')),
             FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,
             FOREIGN KEY (sale_id) REFERENCES sales(id) ON DELETE SET NULL
         )
     """)
+    # Mevcut DB'ye google_event_id kolonu ekle (varsa hata vermez)
+    try:
+        c.execute("ALTER TABLE reminders ADD COLUMN google_event_id TEXT")
+    except Exception:
+        pass
 
     c.execute("""
         CREATE TABLE IF NOT EXISTS holidays (

@@ -2,32 +2,35 @@ from fastapi import APIRouter, HTTPException
 from datetime import date, timedelta
 from database import get_connection
 from models import SaleCreate
+import google_calendar as gcal
 
 router = APIRouter(prefix="/api/sales", tags=["sales"])
 
 
 def _create_sale_reminders(conn, sale_id: int, customer_id: int, customer_name: str, product_name: str, sale_date: str):
     base = date.fromisoformat(sale_date)
-    reminders = [
+    items = [
         (
-            customer_id,
-            sale_id,
-            "satisfaction_call",
+            customer_id, sale_id, "satisfaction_call",
             (base + timedelta(days=7)).strftime("%Y-%m-%d"),
             f"{customer_name} — {product_name} aldı. Memnuniyet araması yap.",
+            f"{customer_name} — Memnuniyet Araması",
         ),
         (
-            customer_id,
-            sale_id,
-            "product_suggestion",
+            customer_id, sale_id, "product_suggestion",
             (base + timedelta(days=90)).strftime("%Y-%m-%d"),
             f"{customer_name} — 3 ay önce {product_name} almıştı. Yeni ürün öner.",
+            f"{customer_name} — Ürün Önerisi",
         ),
     ]
-    conn.executemany(
-        "INSERT INTO reminders (customer_id, sale_id, reminder_type, scheduled_date, message) VALUES (?,?,?,?,?)",
-        reminders,
-    )
+    for customer_id_, sale_id_, rtype, date_str, msg, cal_title in items:
+        cur = conn.execute(
+            "INSERT INTO reminders (customer_id, sale_id, reminder_type, scheduled_date, message) VALUES (?,?,?,?,?)",
+            (customer_id_, sale_id_, rtype, date_str, msg),
+        )
+        event_id = gcal.create_event(rtype, cal_title, msg, date_str, cur.lastrowid)
+        if event_id:
+            conn.execute("UPDATE reminders SET google_event_id=? WHERE id=?", (event_id, cur.lastrowid))
 
 
 @router.get("/")
