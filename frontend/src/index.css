@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-gold: #C9A84C;
+  --color-dark: #1A1A2E;
+  --color-surface: #16213E;
+  --color-accent: #E8C97A;
+}
+
+body {
+  background-color: #1A1A2E;
+  color: #e2e8f0;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+@layer components {
+  .input {
+    @apply bg-surface-2 border border-gray-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-gold transition-colors;
+  }
+  .btn-primary {
+    @apply bg-gold hover:bg-gold-light text-dark font-semibold rounded-lg px-4 py-2 text-sm transition-colors;
+  }
+  .btn-secondary {
+    @apply bg-surface-2 hover:bg-gray-700 text-gray-300 border border-gray-600 rounded-lg px-4 py-2 text-sm transition-colors;
+  }
+}
+
+/* FullCalendar dark theme overrides */
+.fc {
+  --fc-border-color: #2d3748;
+  --fc-button-bg-color: #C9A84C;
+  --fc-button-border-color: #C9A84C;
+  --fc-button-hover-bg-color: #E8C97A;
+  --fc-button-active-bg-color: #a8873b;
+  --fc-today-bg-color: rgba(201, 168, 76, 0.15);
+  --fc-page-bg-color: #16213E;
+  --fc-neutral-bg-color: #0F3460;
+  color: #e2e8f0;
+}
+
+.fc-theme-standard td, .fc-theme-standard th {
+  border-color: #2d3748;
+}

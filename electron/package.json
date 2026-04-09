@@ -1,0 +1,35 @@
+{
+  "name": "d-diamond-crm",
+  "version": "1.0.0",
+  "description": "D Diamond Kuyumcu CRM",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win --x64"
+  },
+  "build": {
+    "appId": "com.ddiamond.crm",
+    "productName": "D Diamond CRM",
+    "directories": {
+      "output": "../dist"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "icon.ico"
+    },
+    "files": [
+      "main.js",
+      "../frontend/dist/**"
+    ],
+    "extraResources": [
+      {
+        "from": "../backend",
+        "to": "backend"
+      }
+    ]
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  }
+}
